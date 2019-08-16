@@ -29,7 +29,13 @@ init([]) ->
     SupFlags = #{strategy => one_for_all,
                  intensity => 0,
                  period => 1},
-    ChildSpecs = [],
+    StoriesFetchService = #{id => stories_fetch_service,
+                     start => {hacker_stories_fetch_service, start_link, []},
+                     restart => permanent,
+                     shutdown => 5000,
+                     type => worker,
+                     modules => [hacker_stories_fetch_service]},
+    ChildSpecs = [StoriesFetchService],
     {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions
