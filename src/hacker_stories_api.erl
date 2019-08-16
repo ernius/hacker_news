@@ -25,7 +25,9 @@ get_top_stories(StoriesNumber) ->
 %% private functions
 -spec get_url(URL :: string()) -> {ok, jsx:json_term()} | error.
 get_url(URL) ->
-    case httpc:request(get, {URL, []}, [{timeout, ?REQUESTS_TIMEOUT}], []) of
-    	{ok, {{_Version, 200, _ReasonPhrase}, _Headers, Body}} -> {ok, jsx:decode(list_to_binary(Body), [return_maps])};
-    	_                                                      -> error
+    try
+	{ok, {{_Version, 200, _ReasonPhrase}, _Headers, Body}} = httpc:request(get, {URL, []}, [{timeout, ?REQUESTS_TIMEOUT}], []),
+	{ok, jsx:decode(list_to_binary(Body), [return_maps])}
+    catch
+	_:_ -> error
     end.
