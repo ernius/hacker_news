@@ -19,6 +19,7 @@ get_top_stories(StoriesNumber) ->
 	TrimList   = lists:sublist(List, StoriesNumber),
 	{ok, [ Story || StoryId <- TrimList, {ok, Story} <- [get_story(StoryId)] ]}
     catch
+	% topstories error
 	_:_ -> error
     end.
 
@@ -29,5 +30,6 @@ get_url(URL) ->
 	{ok, {{_Version, 200, _ReasonPhrase}, _Headers, Body}} = httpc:request(get, {URL, []}, [{timeout, ?REQUESTS_TIMEOUT}], []),
 	{ok, jsx:decode(list_to_binary(Body), [return_maps])}
     catch
+	% request timeout or jsx:decode error 
 	_:_ -> error
     end.
