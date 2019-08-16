@@ -19,11 +19,11 @@ get_top_stories(StoriesNumber) ->
 	TrimList   = lists:sublist(List, StoriesNumber),
 	{ok, [ Story || StoryId <- TrimList, {ok, Story} <- [get_story(StoryId)] ]}
     catch
-	% topstories error
+	% topstories error, get_story errors are just filtered from result list.
 	_:_ -> error
     end.
 
-%% private functions
+%% internal functions
 -spec get_url(URL :: string()) -> {ok, jsx:json_term()} | error.
 get_url(URL) ->
     try
