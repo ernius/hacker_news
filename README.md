@@ -7,3 +7,8 @@ Build
 -----
 
     $ rebar3 compile
+
+Unit tests
+-----
+
+	$ rebar3 eunit
