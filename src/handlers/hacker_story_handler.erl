@@ -5,8 +5,9 @@
 init(Req=#{method := <<"GET">>}, Opts) ->
     try
 	SId = cowboy_req:binding(story_id, Req),
-	lager:info("Story handler story_id:~p",[SId]),
-	{ok, hacker_stories_web:reply_ok(Req, <<"Story requested">>), Opts}
+	{ok, Story} = hacker_stories_fetch_service:get_story(SId),
+	lager:info("Story handler story_id:~p story:~p",[SId, Story]),
+	{ok, hacker_stories_web:reply_ok(Req, Story), Opts}
     catch
 	_:_ -> {ok, hacker_stories_web:reply_not_available(Req), Opts}       
     end;		 

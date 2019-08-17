@@ -11,7 +11,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, get_stories/0]).
+-export([start_link/0, get_story/1, get_stories/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -28,6 +28,25 @@
 %%%===================================================================
 %%% API
 %%%===================================================================
+
+%%--------------------------------------------------------------------
+%% @doc Get story with given Id. Read from ETS.
+%% @end
+%%--------------------------------------------------------------------
+-spec get_story(StoryId :: pos_integer()) -> {ok, map()} | none.
+get_story(StoryId) ->
+    case ets:lookup(?ETS_TABLE_NAME, ?ETS_TABLE_KEY) of
+	[{?ETS_TABLE_KEY, Stories}] -> 
+	    lists:foldl(fun (Story = #{<<"id">> := Id}, Acc) -> 
+				if StoryId =:= Id -> {ok, Story};
+				   true           -> Acc
+				end;
+			    (_                         , Acc) -> Acc 
+			end,
+			none,
+			Stories);
+	[] -> none
+    end.
 
 %%--------------------------------------------------------------------
 %% @doc Get top stories. Read from ETS.

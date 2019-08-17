@@ -4,7 +4,7 @@
 
 init(Req=#{method := <<"GET">>}, Opts) ->
     try
-	lager:info("Top Stories handler ~p",[hacker_stories_fetch_service:get_stories()]),
+	lager:info("Top Stories handler"),
 	{ok, Stories} = hacker_stories_fetch_service:get_stories(),
 	{ok, hacker_stories_web:reply_ok(Req, Stories), Opts}
     catch
