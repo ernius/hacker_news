@@ -28,8 +28,8 @@ init(Req, Opts) ->
 websocket_init(State) ->
     hacker_stories_fetch_service:subscribe(self()),
     case hacker_stories_fetch_service:get_stories() of
-	{ok, Stories} -> {reply, {text, jsx:encode(Stories)}, State};
-        none          -> {ok, State}
+	{ok, Stories} -> {reply, {text, jsx:encode(Stories)}, State, hibernate};
+        none          -> {ok, State, hibernate}
     end.
 
 % message from client
@@ -38,7 +38,7 @@ websocket_handle(_Frame, State) ->
 
 % erlang messages
 websocket_info({stories, Stories}, State) ->
-    {reply, {text, jsx:encode(Stories)}, State}.
+    {reply, {text, jsx:encode(Stories)}, State, hibernate}.
 
 terminate(_Reason, _Req, _State) ->
     hacker_stories_fetch_service:unsubscribe(self()),
