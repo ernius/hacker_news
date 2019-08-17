@@ -14,7 +14,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, get_story/1, get_stories/0]).
+-export([start_link/0, get_story/1, get_stories/0, subscribe/1, unsubscribe/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -61,6 +61,22 @@ get_stories() ->
 	[{?ETS_TABLE_KEY, Stories}] -> {ok, Stories};
 	[] -> none
     end.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Subscribe webservice pid
+%% @end
+%%--------------------------------------------------------------------
+subscribe(Pid) ->
+    hacker_stories_fetch_service ! {subscribe, Pid}.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Unsubscribe webservice pid
+%% @end
+%%--------------------------------------------------------------------
+unsubscribe(Pid) ->
+    hacker_stories_fetch_service ! {unsubscribe, Pid}.
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -152,9 +168,12 @@ handle_info(fetch, State = #state{ web_sockets_pids = Pids}) ->
     TRef = erlang:send_after(?FETCH_PERIOD, self(), fetch),
     {noreply, State#state{timer_ref = TRef}};
 handle_info({subscribe, Pid}, State = #state{ web_sockets_pids = Pids}) ->
+    lager:info("Subscribed websocket pid:~p rest of pids:~p",[Pid, Pids]),
     {noreply, State#state{ web_sockets_pids = [Pid | Pids] }};
 handle_info({unsubscribe, Pid}, State = #state{ web_sockets_pids = Pids}) ->
-    {noreply, State#state{ web_sockets_pids = lists:delete(Pid, Pids) }}.
+    RemainingPids = lists:delete(Pid, Pids),
+    lager:info("Unsubscribed websocket pid:~p, remaining pids:~p",[Pid, RemainingPids]),
+    {noreply, State#state{ web_sockets_pids = RemainingPids}}.
 
 %%--------------------------------------------------------------------
 %% @private

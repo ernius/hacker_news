@@ -10,7 +10,7 @@
 -export([get_story/1, get_top_stories/1]).
 
 -define(API_BASE_URL, "https://hacker-news.firebaseio.com/v0/").
--define(REQUESTS_TIMEOUT, 2000).
+-define(REQUESTS_TIMEOUT, 4000).
 
 -spec get_story(StoryId :: pos_integer()) -> {ok, jsx:json_term()} | error.
 get_story(StoryId) ->
