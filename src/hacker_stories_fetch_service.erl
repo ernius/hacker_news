@@ -68,6 +68,7 @@ start_link() ->
 			      {stop, Reason :: term()} |
 			      ignore.
 init([]) ->
+    lager:info("Fetch top stories service started!~n"),
     ets:new(?ETS_TABLE_NAME, [set, named_table]),
     self() ! fetch,
     {ok, #state{}}.
@@ -119,7 +120,7 @@ handle_info(fetch, State) ->
     % only update ets if stories could been fetched
     case hacker_stories_api:get_top_stories(?N_TOP_STORIES) of
 	{ok, Stories} -> 
-	    io:format("Fetched stories:~p~n",[Stories]),
+	    lager:info("Fetched stories:~p~n",[Stories]),
 	    ets:insert(?ETS_TABLE_NAME, {?ETS_TABLE_KEY, Stories});
 	error -> ok
     end,
