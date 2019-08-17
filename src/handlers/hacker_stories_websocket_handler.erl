@@ -7,6 +7,9 @@
 
 -module(hacker_stories_websocket_handler).
 
+% idle_timeout that cowboy does close due to idle connection (no ping from client)
+-define(IDLE_TIMEOUT, 60000).
+
 %% cowboy_websocket callbacks
 -export([init/2,
          websocket_init/1,
@@ -16,7 +19,7 @@
 	]).
 
 init(Req=#{method := <<"GET">>}, State) ->
-    {cowboy_websocket, Req, State};
+    {cowboy_websocket, Req, State, #{ idle_timeout => ?IDLE_TIMEOUT }};
 init(Req, Opts) ->
     {ok, hacker_stories_web:reply_page_not_found(Req), Opts}.
 
