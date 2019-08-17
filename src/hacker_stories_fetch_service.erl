@@ -2,7 +2,10 @@
 %%% @author ernesto <>
 %%% @copyright (C) 2019, ernesto
 %%% @doc
-%%% This service fetch every 5 minutes top stories, loads them in the ETS, and makes them available throw get_stories/0
+%%% This service subscribe/unsubscribe pids throw async messages.
+%%% Every 5 minutes fetch top stories, loads them in the ETS, and notify all subscribed Pids. 
+%%% Stores loaded in ETS are available throw API get_stories/0 and get_story/1.
+%%% 
 %%% @end
 %%% Created : 16 Aug 2019 by ernesto <>
 %%%-------------------------------------------------------------------
@@ -23,7 +26,7 @@
 -define(ETS_TABLE_KEY, top_stories_table).
 -define(N_TOP_STORIES, 2). %TODO: 50).
 
--record(state, {timer_ref :: erlang:reference(), time_stamp :: erlang:time_stamp()}).
+-record(state, {timer_ref :: erlang:reference(), web_sockets_pids :: [pid()]}).
 
 %%%===================================================================
 %%% API
@@ -90,7 +93,7 @@ init([]) ->
     lager:info("Fetch top stories service started!"),
     ets:new(?ETS_TABLE_NAME, [set, named_table]),
     self() ! fetch,
-    {ok, #state{}}.
+    {ok, #state{ web_sockets_pids = []}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -135,18 +138,23 @@ handle_cast(_Request, State) ->
 			 {noreply, NewState :: term(), Timeout :: timeout()} |
 			 {noreply, NewState :: term(), hibernate} |
 			 {stop, Reason :: normal | term(), NewState :: term()}.
-handle_info(fetch, State) ->
+handle_info(fetch, State = #state{ web_sockets_pids = Pids}) ->
     % only update ets if stories could been fetched
     case hacker_stories_api:get_top_stories(?N_TOP_STORIES) of
 	{ok, Stories} -> 
 	    lager:info("Fetched ~p stories~n",[length(Stories)]),
-	    ets:insert(?ETS_TABLE_NAME, {?ETS_TABLE_KEY, Stories});
+	    ets:insert(?ETS_TABLE_NAME, {?ETS_TABLE_KEY, Stories}),
+	    [Pid ! {stories, Stories} || Pid <- Pids];
 	error -> 
 	    lager:error("Stories could not be fetched"),
 	    ok
     end,
     TRef = erlang:send_after(?FETCH_PERIOD, self(), fetch),
-    {noreply, State#state{timer_ref = TRef}}.
+    {noreply, State#state{timer_ref = TRef}};
+handle_info({subscribe, Pid}, State = #state{ web_sockets_pids = Pids}) ->
+    {noreply, State#state{ web_sockets_pids = [Pid | Pids] }};
+handle_info({unsubscribe, Pid}, State = #state{ web_sockets_pids = Pids}) ->
+    {noreply, State#state{ web_sockets_pids = lists:delete(Pid, Pids) }}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -156,7 +164,8 @@ handle_info(fetch, State) ->
 %%--------------------------------------------------------------------
 -spec terminate(Reason :: normal | shutdown | {shutdown, term()} | term(),
 		State :: term()) -> any().
-terminate(_Reason, #state{timer_ref = TRef}) ->
+terminate(_Reason, #state{timer_ref = TRef, web_sockets_pids = Pids}) ->
+    [Pid ! terminate || Pid <- Pids],
     timer:cancel(TRef).
 
 %%--------------------------------------------------------------------
