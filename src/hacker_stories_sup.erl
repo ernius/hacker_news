@@ -26,5 +26,11 @@ init([]) ->
 			    shutdown => 5000,
 			    type => worker,
 			    modules => [hacker_stories_fetch_service]},
-    ChildSpecs = [StoriesFetchService],
+    HttpService = #{id => http_service,
+		    start => {hacker_stories_http_service, start_link, []},
+		    restart => permanent,
+		    shutdown => 5000,
+		    type => worker,
+		    modules => [hacker_stories_http_service]},
+    ChildSpecs = [StoriesFetchService, HttpService],
     {ok, {SupFlags, ChildSpecs}}.
