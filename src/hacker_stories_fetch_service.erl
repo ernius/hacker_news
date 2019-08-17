@@ -2,7 +2,7 @@
 %%% @author ernesto <>
 %%% @copyright (C) 2019, ernesto
 %%% @doc
-%%%
+%%% This service fetch every 5 minutes top stories, loads them in the ETS, and makes them available throw get_stories/0
 %%% @end
 %%% Created : 16 Aug 2019 by ernesto <>
 %%%-------------------------------------------------------------------
@@ -29,6 +29,10 @@
 %%% API
 %%%===================================================================
 
+%%--------------------------------------------------------------------
+%% @doc Get top stories. Read from ETS.
+%% @end
+%%--------------------------------------------------------------------
 -spec get_stories() -> {ok, list(map())} | none.
 get_stories() ->
     case ets:lookup(?ETS_TABLE_NAME, ?ETS_TABLE_KEY) of
@@ -102,8 +106,8 @@ handle_cast(_Request, State) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc
-%% Handling all non call/cast messages
+%% @doc Fetch top stories when message arrives.
+%% A message is received every ?FETCH_PERIOD ms, fetching top stories and store them in ETS.
 %% @end
 %%--------------------------------------------------------------------
 -spec handle_info(Info :: timeout() | term(), State :: term()) ->
@@ -125,10 +129,7 @@ handle_info(fetch, State) ->
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
-%% This function is called by a gen_server when it is about to
-%% terminate. It should be the opposite of Module:init/1 and do any
-%% necessary cleaning up. When it returns, the gen_server terminates
-%% with Reason. The return value is ignored.
+%% Cancels timer
 %% @end
 %%--------------------------------------------------------------------
 -spec terminate(Reason :: normal | shutdown | {shutdown, term()} | term(),

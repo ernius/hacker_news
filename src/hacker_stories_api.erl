@@ -1,4 +1,9 @@
-%% Module that consumes hacker-news API
+%%% @author ernesto <>
+%%% @copyright (C) 2019, ernesto
+%%% @doc Module that consumes hacker-news API
+%%%
+%%% @end
+%%% Created : 17 Aug 2019 by ernesto <>
 
 -module(hacker_stories_api).
 
@@ -11,7 +16,11 @@
 get_story(StoryId) ->
     get_url(?API_BASE_URL "item/" ++ integer_to_list(StoryId) ++ ".json").
 
-% Return the available top stories (could be less than StoriesNumber)
+
+%%--------------------------------------------------------------------
+%% @doc Return the available top stories (could be less than StoriesNumber, caused by possible get_story errors)
+%% @end
+%%--------------------------------------------------------------------
 -spec get_top_stories(StoriesNumber :: pos_integer()) -> {ok, list(jsx:json_term())} | error.
 get_top_stories(StoriesNumber) ->
     try
@@ -23,7 +32,10 @@ get_top_stories(StoriesNumber) ->
 	_:_ -> error
     end.
 
-%% internal functions
+%%%=============================================================================
+%%% Internal functions
+%%%=============================================================================
+
 -spec get_url(URL :: string()) -> {ok, jsx:json_term()} | error.
 get_url(URL) ->
     try
