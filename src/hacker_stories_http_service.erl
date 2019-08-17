@@ -55,7 +55,9 @@ start_link() ->
 init([]) ->
     Dispatch = cowboy_router:compile([
         {'_', [{"/top_stories/:story_id", [{story_id,int}], hacker_story_handler, []},
-	       {"/top_stories", [], hacker_top_stories_handler, []}]}]),
+	       {"/top_stories", [], hacker_top_stories_handler, []},
+	       {"/top_stories/webservice", [], hacker_stories_webservice_handler, []}
+	      ]}]),
     {ok, Port} = application:get_env(hacker_stories, rest_port),
     {ok, _} = cowboy:start_clear(http_stories,
     				 [{port, Port}],
