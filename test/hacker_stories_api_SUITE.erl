@@ -16,7 +16,7 @@ check_known_story_test() ->
 	      <<"url">> := <<"http://ycombinator.com">>}},
        hacker_stories_api:get_story(1)).
 
-%% test hacker news service timeout
+%% test hacker news service timeout (httpc:request timeout)
 check_timeout_error_test() ->
     meck:new(httpc, [non_strict]),
     meck:expect(httpc, request, fun(_,_,_,_) -> {error, timeout} end),
@@ -24,7 +24,7 @@ check_timeout_error_test() ->
     meck:unload(httpc),
     ?assertMatch(error, Result).
 
-%% test wrong JSON format
+%% test wrong JSON format (jsx:decode error)
 check_json_format_error_test() ->
     meck:new(httpc, [non_strict]),
     meck:expect(httpc, request, fun(_,_,_,_) -> 
