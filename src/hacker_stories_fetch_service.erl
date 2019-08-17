@@ -164,8 +164,7 @@ handle_info({unsubscribe, Pid}, State = #state{ web_sockets_pids = Pids}) ->
 %%--------------------------------------------------------------------
 -spec terminate(Reason :: normal | shutdown | {shutdown, term()} | term(),
 		State :: term()) -> any().
-terminate(_Reason, #state{timer_ref = TRef, web_sockets_pids = Pids}) ->
-    [Pid ! terminate || Pid <- Pids],
+terminate(_Reason, #state{timer_ref = TRef}) ->
     timer:cancel(TRef).
 
 %%--------------------------------------------------------------------
