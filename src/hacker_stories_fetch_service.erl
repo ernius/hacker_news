@@ -14,7 +14,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, get_story/1, get_stories/0, subscribe/1, unsubscribe/1]).
+-export([start_link/0, get_story/1, get_stories/0, subscribe/1, unsubscribe/1, get_paginated_stories/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -26,6 +26,7 @@
 -define(ETS_TABLE_NAME, top_stories_table).
 -define(ETS_TABLE_KEY, top_stories_table).
 -define(N_TOP_STORIES, 50).
+-define(PAGINATION_PAGE_SIZE, 10).
 
 -record(state, {timer_ref :: erlang:reference(), web_sockets_pids :: [pid()]}).
 
@@ -34,7 +35,8 @@
 %%%===================================================================
 
 %%--------------------------------------------------------------------
-%% @doc Get story with given Id. Read from ETS.
+%% @doc Get story with given Id. Stories are read from ETS.
+%% The story must be one of the N_TOP_STORIES top stories.
 %% @end
 %%--------------------------------------------------------------------
 -spec get_story(StoryId :: pos_integer()) -> {ok, map()} | none.
@@ -45,7 +47,8 @@ get_story(StoryId) ->
 				if StoryId =:= Id -> {ok, Story};
 				   true           -> Acc
 				end;
-			    (_                         , Acc) -> Acc 
+			    (_                         , Acc) ->
+				Acc 
 			end,
 			none,
 			Stories);
@@ -53,7 +56,7 @@ get_story(StoryId) ->
     end.
 
 %%--------------------------------------------------------------------
-%% @doc Get top stories. Read from ETS.
+%% @doc Get N_TOP_STORIES top stories. Stories are read from ETS.
 %% @end
 %%--------------------------------------------------------------------
 -spec get_stories() -> {ok, list(map())} | none.
@@ -62,6 +65,28 @@ get_stories() ->
 	[{?ETS_TABLE_KEY, Stories}] -> {ok, Stories};
 	[] -> none
     end.
+
+%%--------------------------------------------------------------------
+%% @doc Get N_TOP_STORIES top stories paginated. Stories are read from ETS.
+%% Get total number of pages and the NPage page of PAGINATION_PAGE_SIZE size
+%% Pages are numerated from 1.
+%% @end
+%%--------------------------------------------------------------------
+-spec get_paginated_stories(NPage :: non_neg_integer()) -> {ok, pos_integer(), list(map())} | none.
+get_paginated_stories(NPage) ->
+    try
+       {ok, Stories} = get_stories(),
+       %% TotalPages are not fixed as get_stories() could return less than N_TOP_STORIES stories
+       TotalPages = ceil(length(Stories) / ?PAGINATION_PAGE_SIZE),
+       %% This case instruction is necessary because lists:sublist([1,2,3],4,10) = [], with 4 a position outside the given list by one
+       %% When the position equales the length of the list plus one, the empty list is returned, in some version of lists's sublist/3 function
+       case NPage =< TotalPages of
+	   true -> {ok, TotalPages, lists:sublist(Stories, (NPage - 1)*?PAGINATION_PAGE_SIZE + 1, ?PAGINATION_PAGE_SIZE)};
+	   false -> none
+       end
+    catch
+	 _:_ -> none  
+    end.			      
 
 %%--------------------------------------------------------------------
 %% @doc
