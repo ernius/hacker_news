@@ -7,7 +7,7 @@
 
 -module(hacker_stories_web).
 
--export([reply_page_not_found/1, reply_ok/2, reply_not_available/1]).
+-export([reply_page_not_found/1, reply_ok/2, reply_not_available/1, reply_bad_request/1]).
 
 -spec reply_ok(cowboy_req:req(), term()) -> cowboy_req:req().
 reply_ok(Req, Content) ->
@@ -15,7 +15,12 @@ reply_ok(Req, Content) ->
 
 -spec reply_not_available(cowboy_req:req()) -> cowboy_req:req().
 reply_not_available(Req) ->
+    lager:info("Not available response"),
     reply(Req, 404, #{<<"message">> => <<"Resource not available">>}).
+
+-spec reply_bad_request(cowboy_req:req()) -> cowboy_req:req().
+reply_bad_request(Req) ->
+  reply(Req, 400, #{<<"message">> => <<"Bad request">>}).
 
 -spec reply_page_not_found(cowboy_req:req()) -> cowboy_req:req().
 reply_page_not_found(Req) ->
