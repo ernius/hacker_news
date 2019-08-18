@@ -11,6 +11,8 @@
 %%%-------------------------------------------------------------------
 -module(hacker_stories_fetch_service).
 
+-include("hacker_stories.hrl").
+
 -behaviour(gen_server).
 
 %% API
@@ -21,12 +23,6 @@
 	 terminate/2, code_change/3, format_status/2]).
 
 -define(SERVER, ?MODULE).
-
--define(FETCH_PERIOD, 5*60*1000). % 5 minutes
--define(ETS_TABLE_NAME, top_stories_table).
--define(ETS_TABLE_KEY, top_stories_table).
--define(N_TOP_STORIES, 50).
--define(PAGINATION_PAGE_SIZE, 10).
 
 -record(state, {timer_ref :: erlang:reference(), web_sockets_pids :: [pid()]}).
 

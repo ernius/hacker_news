@@ -13,8 +13,7 @@
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--define(ETS_TABLE_NAME, top_stories_table).
--define(ETS_TABLE_KEY, top_stories_table).
+-include("hacker_stories.hrl").
 
 %%--------------------------------------------------------------------
 %% @spec suite() -> Info
@@ -74,7 +73,7 @@ end_per_group(_GroupName, _Config) ->
 %%--------------------------------------------------------------------
 init_per_testcase(_TestCase, Config) ->
     TableId = ets:new(?ETS_TABLE_NAME, [set, named_table]),
-    ets:insert(TableId, {?ETS_TABLE_KEY, lists:seq(1,50)}),
+    ets:insert(TableId, {?ETS_TABLE_KEY, lists:seq(1,?N_TOP_STORIES)}),
     Config.
 
 %%--------------------------------------------------------------------
