@@ -20,3 +20,5 @@ rebar3.crashdump
 rebar.lock
 \#*
 .\#*
+doc
+.doc/*

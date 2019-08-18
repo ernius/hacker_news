@@ -9,7 +9,9 @@ init(Req=#{method := <<"GET">>}, Opts) ->
 	lager:info("Story handler story_id:~p story:~p",[SId, Story]),
 	{ok, hacker_stories_web:reply_ok(Req, Story), Opts}
     catch
-	_:_ -> {ok, hacker_stories_web:reply_not_available(Req), Opts}       
+	Type:Error -> 
+	    lager:error("Exception ~p:~p~nStacktrace:~p",[Type, Error, erlang:get_stacktrace()]),
+	    {ok, hacker_stories_web:reply_not_available(Req), Opts}       
     end;		 
 init(Req, Opts) ->
     {ok, hacker_stories_web:reply_page_not_found(Req), Opts}.

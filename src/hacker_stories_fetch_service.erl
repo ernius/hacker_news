@@ -81,7 +81,9 @@ get_paginated_stories(NPage) ->
 	   false -> none
        end
     catch
-	 _:_ -> none  
+	 Type:Error -> 
+	    lager:error("Exception ~p:~p~nStacktrace:~p",[Type, Error, erlang:get_stacktrace()]),
+	    none  
     end.			      
 
 %%--------------------------------------------------------------------

@@ -38,7 +38,9 @@ get_top_stories(StoriesNumber) ->
 	{ok, [ Story || StoryId <- TrimList, {ok, Story} <- [get_story(StoryId)] ]}
     catch
 	% topstories error, get_story errors are just filtered from result list.
-	_:_ -> error
+	Type:Error -> 
+	    lager:error("Exception ~p:~p~nStacktrace:~p",[Type, Error, erlang:get_stacktrace()]),
+	    error
     end.
 
 %%%=============================================================================
@@ -52,5 +54,7 @@ get_url(URL) ->
 	{ok, jsx:decode(list_to_binary(Body), [return_maps])}
     catch
 	% request timeout or jsx:decode error 
-	_:_ -> error
+	Type:Error -> 
+	    lager:error("Exception ~p:~p~nStacktrace:~p",[Type, Error, erlang:get_stacktrace()]),
+	    error
     end.
