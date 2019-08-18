@@ -3,23 +3,29 @@ hacker_stories
 
 An OTP application
 
-
 Build
 -----
 
-    $ rebar3 compile
+	$ make deps
+	
+Run
+----
+
+	$ make run
+	
 
 Build Documentation
 ----
 
-	$ rebar3 edoc
+	$ make doc
 
-Unit tests
+Tests 
 -----
 
-	$ rebar3 eunit
+	$ make tests
 
-Common tests
------
-
-	$ rebar3 ct
+Dockerized
+----
+	Build: `deps-docker`
+	Test:  `tests-docker`
+	Run:   `run-docker`
