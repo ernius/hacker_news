@@ -1,5 +1,5 @@
 %% Unit testing  hacker_stories_api module
--module(hacker_stories_api_SUITE).
+-module(hacker_stories_api_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -38,7 +38,7 @@ check_json_format_error_test() ->
 					      {"access-control-allow-origin","*"},
 					      {"strict-transport-security",
 					       "max-age=31556926; includeSubDomains; preload"}],
-					     "{\"by\":\"pg\""}}
+					     "{\"by\":\"pg\""}} %% missing closing } at the end
 				end),
     Result = hacker_stories_api:get_story(1),
     meck:unload(httpc),
