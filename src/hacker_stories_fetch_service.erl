@@ -78,7 +78,7 @@ get_paginated_stories(NPage) ->
        {ok, Stories} = get_stories(),
        %% TotalPages are not fixed as get_stories() could return less than N_TOP_STORIES stories
        TotalPages = ceil(length(Stories) / ?PAGINATION_PAGE_SIZE),
-       %% This case instruction is necessary because lists:sublist([1,2,3],4,10) = [], with 4 a position outside the given list by one
+       %% This case instruction is necessary because lists:sublist([1,2,3],4,10) = [], with 4 a position outside the given list length by one.
        %% When the position equales the length of the list plus one, the empty list is returned, in some version of lists's sublist/3 function
        case NPage =< TotalPages of
 	   true -> {ok, TotalPages, lists:sublist(Stories, (NPage - 1)*?PAGINATION_PAGE_SIZE + 1, ?PAGINATION_PAGE_SIZE)};
