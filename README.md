@@ -3,10 +3,16 @@ hacker_stories
 
 An OTP application
 
+
 Build
 -----
 
     $ rebar3 compile
+
+Build Documentation
+----
+
+	$ rebar3 edoc
 
 Unit tests
 -----
