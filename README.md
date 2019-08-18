@@ -12,7 +12,11 @@ Get the `stori_id` story from the 50 top stories.
 
 ### /top_stories?page=<page-number>
 
-Get paginated top stories.
+Get paginated top 50 stories.
+
+### /top_stories
+
+Get the top 50 stories.
 
 Websocket Endpoint
 ---
