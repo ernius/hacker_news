@@ -12,6 +12,13 @@
 -define(API_BASE_URL, "https://hacker-news.firebaseio.com/v0/").
 -define(REQUESTS_TIMEOUT, 4000).
 
+%%--------------------------------------------------------------------
+%% @doc Return a story with a given Id
+%% This call may take REQUESTS_TIMEOUT ms.
+%% This 
+%% @end
+%%--------------------------------------------------------------------
+
 -spec get_story(StoryId :: pos_integer()) -> {ok, jsx:json_term()} | error.
 get_story(StoryId) ->
     get_url(?API_BASE_URL "item/" ++ integer_to_list(StoryId) ++ ".json").
@@ -19,6 +26,8 @@ get_story(StoryId) ->
 
 %%--------------------------------------------------------------------
 %% @doc Return the available top stories (could be less than StoriesNumber, caused by possible get_story errors)
+%% As this method ends calling get_url StoriesNumber + 1, and each call may take as much as REQUESTS_TIMEOUT ms,
+%% this method may take REQUESTS_TIMEOUT*(StoriesNumber + 1) ms
 %% @end
 %%--------------------------------------------------------------------
 -spec get_top_stories(StoriesNumber :: pos_integer()) -> {ok, list(jsx:json_term())} | error.

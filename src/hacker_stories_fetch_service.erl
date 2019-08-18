@@ -21,10 +21,11 @@
 	 terminate/2, code_change/3, format_status/2]).
 
 -define(SERVER, ?MODULE).
--define(FETCH_PERIOD, 5000).%TODO: 5*60*1000).
+
+-define(FETCH_PERIOD, 5*60*1000). % 5 minutes
 -define(ETS_TABLE_NAME, top_stories_table).
 -define(ETS_TABLE_KEY, top_stories_table).
--define(N_TOP_STORIES, 2). %TODO: 50).
+-define(N_TOP_STORIES, 50).
 
 -record(state, {timer_ref :: erlang:reference(), web_sockets_pids :: [pid()]}).
 
@@ -65,10 +66,13 @@ get_stories() ->
 %%--------------------------------------------------------------------
 %% @doc
 %% Subscribe webservice pid
+%% As SERVER_NAME in get_server:start_link is used ServerName={local,?SERVER}, 
+%% then gen_server process is registered locally as ?SERVER using register/2 
+%% as documented in http://erlang.org/doc/man/gen_server.html
 %% @end
 %%--------------------------------------------------------------------
 subscribe(Pid) ->
-    hacker_stories_fetch_service ! {subscribe, Pid}.
+    ?SERVER ! {subscribe, Pid}.
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -76,7 +80,7 @@ subscribe(Pid) ->
 %% @end
 %%--------------------------------------------------------------------
 unsubscribe(Pid) ->
-    hacker_stories_fetch_service ! {unsubscribe, Pid}.
+    ?SERVER ! {unsubscribe, Pid}.
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -145,8 +149,12 @@ handle_cast(_Request, State) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc Fetch top stories when message arrives.
-%% A message is received every ?FETCH_PERIOD ms, fetching top stories and store them in ETS.
+%% @doc Fetch top stories when fetch message arrives.
+%% A message is received every ?FETCH_PERIOD ms, fetching top stories and store them in ETS,
+%% and sending stories to all subscribed Pids.
+%% This function calls hacker_stories_api:get_top_stories(?N_TOP_STORIES) that may take
+%% REQUESTS_TIMEOUT*(?N_TOP_STORIES + 1) ms, thus ?FETCH_PERIOD should be grater than
+%% REQUESTS_TIMEOUT*(?N_TOP_STORIES + 1).
 %% @end
 %%--------------------------------------------------------------------
 -spec handle_info(Info :: timeout() | term(), State :: term()) ->

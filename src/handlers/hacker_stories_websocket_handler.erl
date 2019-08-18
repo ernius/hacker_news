@@ -8,7 +8,7 @@
 -module(hacker_stories_websocket_handler).
 
 % idle_timeout that cowboy does close due to idle connection (no ping from client)
--define(IDLE_TIMEOUT, 60000).
+-define(IDLE_TIMEOUT, 5*60*1000 + 4*60*1000). % 5 + 4 minutes
 
 %% cowboy_websocket callbacks
 -export([init/2,
