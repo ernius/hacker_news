@@ -188,10 +188,14 @@ handle_cast(_Request, State) ->
 			 {noreply, NewState :: term(), hibernate} |
 			 {stop, Reason :: normal | term(), NewState :: term()}.
 handle_info(fetch, State = #state{ web_sockets_pids = Pids}) ->
-    % only update ets if stories could been fetched
+    % Next function may take too much time (as much as REQUESTS_TIMEOUT*(StoriesNumber + 1) ms).
+    % During this time no more messages are handled and 5 minutes period is affected also. 
+    % It would be better to spawn StoriesNumber processes to retrive each story content in parallel, 
+    % and when all stories are retreived notify all subscribed websockets.
     case hacker_stories_api:get_top_stories(?N_TOP_STORIES) of
 	{ok, Stories} -> 
 	    lager:info("Fetched ~p stories~n",[length(Stories)]),
+            % only update ets if stories could been fetched
 	    ets:insert(?ETS_TABLE_NAME, {?ETS_TABLE_KEY, Stories}),
 	    [Pid ! {stories, Stories} || Pid <- Pids];
 	error -> 
