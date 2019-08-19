@@ -134,7 +134,9 @@ start_link() ->
 			      ignore.
 init([]) ->
     lager:info("Fetch top stories service started!"),
-    ets:new(?ETS_TABLE_NAME, [set, named_table]),
+    %% ETS documentation: enable read_concurrency option when concurrent read operations are much more frequent than write operations
+    %% Tunned for a busy server where read operations will be much more frequent that a writing operation every 5 minutes
+    ets:new(?ETS_TABLE_NAME, [set, named_table, {read_concurrency, true}]),
     self() ! fetch,
     {ok, #state{ web_sockets_pids = []}}.
 
