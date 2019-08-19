@@ -188,7 +188,7 @@ handle_cast(_Request, State) ->
 			 {noreply, NewState :: term(), hibernate} |
 			 {stop, Reason :: normal | term(), NewState :: term()}.
 handle_info(fetch, State = #state{ web_sockets_pids = Pids}) ->
-    % Next function may take too much time (as much as REQUESTS_TIMEOUT*(StoriesNumber + 1) ms).
+    % Next function get_top_stories/1 may take too much time (as much as REQUESTS_TIMEOUT*(StoriesNumber + 1) ms).
     % During this time no more messages are handled and 5 minutes period is affected also. 
     % It would be better to spawn StoriesNumber processes to retrive each story content in parallel, 
     % and when all stories are retreived notify all subscribed websockets.
