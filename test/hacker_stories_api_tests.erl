@@ -3,17 +3,25 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-compile(export_all).
+-compile(nowarn_export_all).
+
+story_1() ->
+    #{<<"by">> => <<"pg">>,
+      <<"descendants">> => 15,
+      <<"id">> => 1,
+      <<"type">> => <<"story">>,
+      <<"kids">> => [15,234509,487171,454426,454424,454410,82729],
+      <<"score">> => 57,
+      <<"time">> => 1160418111,
+      <<"title">> => <<"Y Combinator">>,
+      <<"url">> => <<"http://ycombinator.com">>}.    
+
 % test fixed known story
 check_known_story_test() -> 
+    Story = story_1(),
     ?assertMatch(
-       {ok, #{<<"by">> := <<"pg">>,
-	      <<"descendants">> := 15,
-	      <<"id">> := 1,
-	      <<"type">> := <<"story">>,
-	      <<"kids">> := [15,234509,487171,454426,454424,454410,82729],
-	      <<"score">> := 57,<<"time">> := 1160418111,
-	      <<"title">> := <<"Y Combinator">>,
-	      <<"url">> := <<"http://ycombinator.com">>}},
+       {ok, Story},
        hacker_stories_api:get_story(1)).
 
 %% test hacker news service timeout (httpc:request timeout)

@@ -9,6 +9,7 @@
 -module(hacker_stories_fetch_service_SUITE).
 
 -compile(export_all).
+-compile(nowarn_export_all).
 
 -include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").

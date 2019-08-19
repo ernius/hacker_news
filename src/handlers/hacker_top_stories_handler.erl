@@ -11,10 +11,11 @@ init(Req=#{method := <<"GET">>}, Opts) ->
 	case lists:keyfind(<<"page">>, 1, QsVals) of
 	    {_, Page} ->	
 		lager:info("Page requested: ~p",[Page]),
-		{ok, PagesNumber, Stories} = hacker_stories_fetch_service:get_paginated_stories(list_to_integer(binary_to_list(Page))),
+		NPage = list_to_integer(binary_to_list(Page)),
+		{ok, PagesNumber, Stories} = hacker_stories_fetch_service:get_paginated_stories(NPage),
 		{ok, 
 		 hacker_stories_web:reply_ok(Req, 
-					     #{ <<"page">> => Page, 
+					     #{ <<"page">> => NPage, 
 						<<"total_pages">> => PagesNumber, 
 						<<"page_size">> => ?PAGINATION_PAGE_SIZE, 
 						<<"stories">> => Stories }), 
