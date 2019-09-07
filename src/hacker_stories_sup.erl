@@ -18,17 +18,14 @@ start_link() ->
 
 init([]) ->
     SupFlags = #{strategy => one_for_all,
-                 intensity => 0,
-                 period => 1},
+                 intensity => 1, % if more than 1 restart occur in 5 seconds the supervisor terminates and all its childs
+                 period    => 5},
+
     StoriesFetchService = #{id => stories_fetch_service,
 			    start => {hacker_stories_fetch_service, start_link, []},
-			    restart => permanent,
-			    shutdown => 10000,
+			    restart => permanent, % child is always restarted by supevisor
+			    shutdown => 10000,    % time supervisor waits after exit(Child, shutdown) is sent
 			    modules => [hacker_stories_fetch_service]},
-    HttpService = #{id => http_service,
-		    start => {hacker_stories_http_service, start_link, []},
-		    restart => permanent,
-		    shutdown => 10000,
-		    modules => [hacker_stories_http_service]},
-    ChildSpecs = [StoriesFetchService, HttpService],
+
+    ChildSpecs = [StoriesFetchService],
     {ok, {SupFlags, ChildSpecs}}.
