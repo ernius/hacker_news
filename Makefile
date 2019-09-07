@@ -11,7 +11,7 @@ tests:
 	rebar3 ct
 
 run:
-	rebar3 shell
+	ERL_FLAGS=" -args_file config/vm.args -config config/sys.config" rebar3 shell
 
 doc:
 	rebar3 edoc
