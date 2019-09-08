@@ -1,6 +1,8 @@
 %% Unit testing  hacker_stories_api module
 -module(hacker_stories_api_tests).
 
+-include("hacker_stories.hrl").
+
 -include_lib("eunit/include/eunit.hrl").
 
 -compile(export_all).
@@ -17,12 +19,23 @@ story_1() ->
       <<"title">> => <<"Y Combinator">>,
       <<"url">> => <<"http://ycombinator.com">>}.    
 
-% test fixed known story
+%% test fixed known story
 check_known_story_test() -> 
     Story = story_1(),
     ?assertMatch(
        {ok, Story},
        hacker_stories_api:get_story(1)).
+
+%% test async top stories
+check_top_stories_test() ->
+    StoriesNumber = 5,
+    hacker_stories_api:get_async_top_stories(StoriesNumber),
+    
+    Result = receive 
+		 {stories, Stories} -> Stories
+	     after ?REQUESTS_TIMEOUT*2 -> error
+	     end,
+    ?assertMatch(StoriesNumber, length(Result)).
 
 %% test hacker news service timeout (httpc:request timeout)
 check_timeout_error_test() ->
