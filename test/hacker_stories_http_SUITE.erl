@@ -38,7 +38,7 @@ init_per_suite(Config) ->
     {ok, _} = application:ensure_all_started(inets),
     {ok, _} = application:ensure_all_started(hacker_stories),
     {ok, Port} = application:get_env(hacker_stories, rest_port),
-    timer:sleep(20000), %% time to fetch top stories
+    timer:sleep(3*?REQUESTS_TIMEOUT), %% time to fetch top stories
     [{port, Port} | Config].
 
 %%--------------------------------------------------------------------

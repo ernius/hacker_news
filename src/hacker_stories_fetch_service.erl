@@ -174,12 +174,9 @@ handle_cast(_Request, State) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc Fetch top stories when fetch message arrives.
-%% A message is received every ?FETCH_PERIOD ms, fetching top stories and store them in ETS,
-%% and sending stories to all subscribed Pids.
-%% This function calls hacker_stories_api:get_top_stories(?N_TOP_STORIES) that may take
-%% REQUESTS_TIMEOUT*(?N_TOP_STORIES + 1) ms, thus ?FETCH_PERIOD should be grater than
-%% REQUESTS_TIMEOUT*(?N_TOP_STORIES + 1).
+%% @doc Async fetch top stories when fetch message arrives.
+%% Fetch message are received every ?FETCH_PERIOD ms
+%% Once top stories are fetched by a spawn process a message {stories, Stories} arrive, Stories are stored in ETS and sent to all subscribed Pids.
 %% @end
 %%--------------------------------------------------------------------
 -spec handle_info(Info :: timeout() | term(), State :: term()) ->
@@ -187,23 +184,16 @@ handle_cast(_Request, State) ->
 			 {noreply, NewState :: term(), Timeout :: timeout()} |
 			 {noreply, NewState :: term(), hibernate} |
 			 {stop, Reason :: normal | term(), NewState :: term()}.
-handle_info(fetch, State = #state{ web_sockets_pids = Pids}) ->
-    % Next function get_top_stories/1 may take too much time (as much as REQUESTS_TIMEOUT*(StoriesNumber + 1) ms).
-    % During this time no more messages are handled and 5 minutes period is affected also. 
-    % It would be better to spawn StoriesNumber processes to retrive each story content in parallel, 
-    % and when all stories are retreived notify all subscribed websockets.
-    case hacker_stories_api:get_top_stories(?N_TOP_STORIES) of
-	{ok, Stories} -> 
-	    lager:info("Fetched ~p stories~n",[length(Stories)]),
-            % only update ets if stories could been fetched
-	    ets:insert(?ETS_TABLE_NAME, {?ETS_TABLE_KEY, Stories}),
-	    [Pid ! {stories, Stories} || Pid <- Pids];
-	error -> 
-	    lager:error("Stories could not be fetched"),
-	    ok
-    end,
+handle_info(fetch, State) ->
+    lager:info("Start fetching stories ..."),
+    hacker_stories_api:get_async_top_stories(?N_TOP_STORIES),
     TRef = erlang:send_after(?FETCH_PERIOD, self(), fetch),
     {noreply, State#state{timer_ref = TRef}};
+handle_info({stories, Stories}, State = #state{ web_sockets_pids = Pids}) ->
+    lager:info("Fetched ~p stories~n",[length(Stories)]),
+    ets:insert(?ETS_TABLE_NAME, {?ETS_TABLE_KEY, Stories}),
+    [Pid ! {stories, Stories} || Pid <- Pids],
+    {noreply, State};
 handle_info({subscribe, Pid}, State = #state{ web_sockets_pids = Pids}) ->
     lager:info("Subscribed websocket pid:~p rest of pids:~p",[Pid, Pids]),
     {noreply, State#state{ web_sockets_pids = [Pid | Pids] }};
