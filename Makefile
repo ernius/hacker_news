@@ -10,7 +10,7 @@ tests:
 	rebar3 eunit
 	rebar3 ct
 
-run:
+run:    deps
 	ERL_FLAGS=" -args_file config/vm.args -config config/sys.config" rebar3 as dev shell
 
 doc:

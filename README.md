@@ -25,6 +25,10 @@ Websocket Endpoint
 
 Websocket that re-sends the 50 tops stories every 5 minutes.
 
+Can be tested with next command:
+
+	$ wscat -c http://localhost:8000/top_stories/websocket
+
 Build
 -----
 
