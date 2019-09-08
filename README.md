@@ -1,7 +1,7 @@
-hacker_stories
+hacker stories
 =====
 
-An OTP application 
+An OTP application with a `gen_server` process that fetch every 5 minutes the top stories from https://hacker-news.firebaseio.com/v0, and make stories available via two public APIs: JSON over http and JSON over WebSockets.
 
 HTTP Endpoints
 ----
